@@ -1,6 +1,6 @@
 package com.example.assignment.network.data
 
-data class MessagesResponse(
+data class MessageResponse(
     val id: Int,
     val thread_id: Int,
     val user_id: String,
