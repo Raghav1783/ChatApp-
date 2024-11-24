@@ -13,6 +13,11 @@ class MessageRepository @Inject constructor(private val messageApi: MessageApi) 
     val allMessageResponseLiveData: LiveData<NetworkResult<List<MessageResponse>>>
         get() = _allMessageResponseLiveData
 
+    private val _ChatsResponseLiveData = MutableLiveData<NetworkResult<List<MessageResponse>>>()
+    val ChatsResponseLiveData: LiveData<NetworkResult<List<MessageResponse>>>
+        get() = _ChatsResponseLiveData
+
+
 
     suspend fun getMessages(){
         _allMessageResponseLiveData.postValue(NetworkResult.Loading())
@@ -30,6 +35,30 @@ class MessageRepository @Inject constructor(private val messageApi: MessageApi) 
         } catch (e: Exception) {
             _allMessageResponseLiveData.postValue(NetworkResult.Error(e.message ?: "An unexpected error occurred"))
         }
+    }
+
+    suspend fun getChats(thread_id:String){
+        _ChatsResponseLiveData.postValue(NetworkResult.Loading())
+        try {
+            val response = messageApi.getAllMessages()
+            if (response.isSuccessful && response.body() != null) {
+                val messages = response.body()!!
+
+                val distinctMessages = filterDistinctChats(messages,thread_id)
+                _ChatsResponseLiveData.postValue(NetworkResult.Success(distinctMessages))
+            } else {
+                val erorobj = JSONObject(response.errorBody()!!.charStream().readText())
+                _ChatsResponseLiveData.postValue(NetworkResult.Error(erorobj.getString("error")))
+            }
+        } catch (e: Exception) {
+            _ChatsResponseLiveData.postValue(NetworkResult.Error(e.message ?: "An unexpected error occurred"))
+        }
+    }
+
+    private fun filterDistinctChats(messages: List<MessageResponse>, threadId: String): List<MessageResponse> {
+        return messages
+            .filter {  it.thread_id.toString() == threadId }
+            .sortedBy { it.timestamp }
     }
 
     private fun filterDistinctMessages(messages: List<MessageResponse>): List<MessageResponse> {

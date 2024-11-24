@@ -1,60 +1,70 @@
 package com.example.assignment.Fragment
 
+import android.content.ContentValues.TAG
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ProgressBar
+import android.widget.TextView
+import androidx.core.view.isVisible
+import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.assignment.Adapter.ChatAdapter
 import com.example.assignment.R
+import com.example.assignment.ViewModels.MessageViewModel
+import com.example.assignment.utils.NetworkResult
+import dagger.hilt.android.AndroidEntryPoint
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [ChatScreen.newInstance] factory method to
- * create an instance of this fragment.
- */
+@AndroidEntryPoint
 class ChatScreen : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
-
+    private lateinit var chatAdapter: ChatAdapter
+    private val MessageViewModel by viewModels<MessageViewModel>()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_chat_screen, container, false)
-    }
+        val view = inflater.inflate(R.layout.fragment_chat_screen, container, false)
+        val threadid = arguments?.getString("thread_id")
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment ChatScreen.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            ChatScreen().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+        val heading = view.findViewById<TextView>(R.id.chatHeading)
+        val recyclerView = view.findViewById<RecyclerView>(R.id.chatRecyclerView)
+        val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
+        val messageET = view.findViewById<EditText>(R.id.messageEditText)
+        val sendbtn = view.findViewById<Button>(R.id.sendButton)
+
+        heading.text = "Thread number $threadid"
+        chatAdapter = ChatAdapter()
+        recyclerView.adapter = chatAdapter
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+
+        MessageViewModel.chats.observe(viewLifecycleOwner) { result ->
+            progressBar.isVisible = result is NetworkResult.Loading
+            when (result) {
+                is NetworkResult.Success -> {
+                    Log.d(TAG, "onCreateView: yo")
+                    chatAdapter.submitList(result.data) {
+                        recyclerView.scrollToPosition(chatAdapter.itemCount - 1)
+                    }
+                }
+                is NetworkResult.Error -> {
+                    Log.e(TAG, "Error: ${result.message}")
+                }
+                is NetworkResult.Loading -> {
+
                 }
             }
+        }
+
+        MessageViewModel.getChats(threadid.toString())
+        return view
     }
+
 }
