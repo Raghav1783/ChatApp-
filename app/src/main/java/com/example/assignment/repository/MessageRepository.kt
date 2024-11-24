@@ -18,18 +18,24 @@ class MessageRepository @Inject constructor(private val messageApi: MessageApi) 
     val ChatsResponseLiveData: LiveData<NetworkResult<List<MessageResponse>>>
         get() = _ChatsResponseLiveData
 
-    private val _statusLiveData = MutableLiveData<NetworkResult<List<MessageResponse>>>()
-    val statusLiveData: LiveData<NetworkResult<List<MessageResponse>>>
+    private val _statusLiveData = MutableLiveData<NetworkResult<String>>()
+    val statusLiveData: LiveData<NetworkResult<String>>
         get() = _statusLiveData
 
     suspend fun createchats(messageRequest: MessageRequest){
         _statusLiveData.postValue(NetworkResult.Loading())
-        messageApi.createMessage(messageRequest)
+       val response = messageApi.createMessage(messageRequest)
+        if (response.isSuccessful) {
+            _statusLiveData.postValue(NetworkResult.Success("ok"))
+        }
     }
 
     suspend fun deleteChats(){
         _statusLiveData.postValue(NetworkResult.Loading())
         val response = messageApi.resetMessages()
+        if (response.isSuccessful) {
+            _statusLiveData.postValue(NetworkResult.Success("ok"))
+        }
     }
 
     suspend fun getMessages(){

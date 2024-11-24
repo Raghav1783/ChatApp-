@@ -31,7 +31,7 @@ class AllMessage : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_all_message, container, false)
         val recyclerView = view.findViewById<RecyclerView>(R.id.chatListRecyclerView)
-        val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
+
         val toolbar = view.findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
         toolbar.inflateMenu(R.menu.toolbar_menu)
 
@@ -39,8 +39,6 @@ class AllMessage : Fragment() {
             when (menuItem.itemId) {
                 R.id.action_delete -> {
                     showDeleteConfirmationDialog()
-                    MessageViewModel.DeleteChat()
-                    MessageViewModel.getMessages()
                     true
                 }
                 else -> false
@@ -52,6 +50,16 @@ class AllMessage : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
 
+
+
+        MessageViewModel.getMessages()
+        return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val progressBar =  view.findViewById<ProgressBar>(R.id.progressBar)
+        val recyclerView = view.findViewById<RecyclerView>(R.id.chatListRecyclerView)
         MessageViewModel.allMessageLivedata.observe(viewLifecycleOwner) { result ->
             progressBar.isVisible = result is NetworkResult.Loading
             when (result) {
@@ -70,8 +78,21 @@ class AllMessage : Fragment() {
             }
         }
 
-        MessageViewModel.getMessages()
-        return view
+        MessageViewModel.status.observe(viewLifecycleOwner) { result ->
+            progressBar.isVisible = result is NetworkResult.Loading
+            when (result) {
+                is NetworkResult.Success -> {
+                    Log.d(TAG, "onCreateView: yo")
+                    MessageViewModel.getMessages()
+                }
+                is NetworkResult.Error -> {
+                    Log.e(TAG, "Error: ${result.message}")
+                }
+                is NetworkResult.Loading -> {
+
+                }
+            }
+        }
     }
 
 
@@ -81,7 +102,6 @@ class AllMessage : Fragment() {
             .setMessage("Are you sure you want to delete all chats?")
             .setPositiveButton("Delete") { _, _ ->
                 MessageViewModel.DeleteChat()
-                MessageViewModel.getMessages()
             }
             .setNegativeButton("Cancel", null)
             .create()

@@ -27,16 +27,17 @@ import dagger.hilt.android.AndroidEntryPoint
 class ChatScreen : Fragment() {
     private lateinit var chatAdapter: ChatAdapter
     private val MessageViewModel by viewModels<MessageViewModel>()
+    private var threadid: String? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_chat_screen, container, false)
-        val threadid = arguments?.getString("thread_id")
+        threadid = arguments?.getString("thread_id")
 
         val heading = view.findViewById<TextView>(R.id.chatHeading)
         val recyclerView = view.findViewById<RecyclerView>(R.id.chatRecyclerView)
-        val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
         val messageET = view.findViewById<EditText>(R.id.messageEditText)
         val sendbtn = view.findViewById<Button>(R.id.sendButton)
 
@@ -45,18 +46,33 @@ class ChatScreen : Fragment() {
         recyclerView.adapter = chatAdapter
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
+        sendbtn.setOnClickListener {
+            val messageText = messageET.text?.toString()
+            if (!messageText.isNullOrBlank()) {
+                MessageViewModel.createChat(MessageRequest(threadid.orEmpty(), messageText))
+                messageET.text.clear()
+
+            }
+        }
+        MessageViewModel.getChats(threadid.toString())
+        return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
+        val recyclerView = view.findViewById<RecyclerView>(R.id.chatRecyclerView)
 
         MessageViewModel.chats.observe(viewLifecycleOwner) { result ->
             progressBar.isVisible = result is NetworkResult.Loading
             when (result) {
                 is NetworkResult.Success -> {
-                    Log.d(TAG, "onCreateView: yo")
                     chatAdapter.submitList(result.data) {
                         recyclerView.scrollToPosition(chatAdapter.itemCount - 1)
                     }
                 }
                 is NetworkResult.Error -> {
-                    Log.e(TAG, "Error: ${result.message}")
+                    Log.e("ChatFragment", "Error: ${result.message}")
                 }
                 is NetworkResult.Loading -> {
 
@@ -64,16 +80,21 @@ class ChatScreen : Fragment() {
             }
         }
 
-        sendbtn.setOnClickListener{
-            if(messageET.text!=null)
-                MessageViewModel.createChat(MessageRequest(threadid.toString(),messageET.text.toString()))
-            messageET.text.clear()
-            MessageViewModel.getChats(threadid.toString())
+        MessageViewModel.status.observe(viewLifecycleOwner) { result ->
+            when (result) {
+                is NetworkResult.Success -> {
+                    threadid?.let {
+                        MessageViewModel.getChats(it)
 
+                    }
+                }
+                is NetworkResult.Error -> {
+                    Log.e("ChatFragment", "Status Error: ${result.message}")
+                }
+                is NetworkResult.Loading -> {
+
+                }
+            }
         }
-
-        MessageViewModel.getChats(threadid.toString())
-        return view
     }
-
 }

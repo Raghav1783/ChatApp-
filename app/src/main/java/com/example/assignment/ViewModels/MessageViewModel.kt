@@ -20,6 +20,8 @@ class MessageViewModel@Inject constructor(private val MessageRepository: Message
     val chats: LiveData<NetworkResult<List<MessageResponse>>>
         get() = MessageRepository.ChatsResponseLiveData
 
+    val status get() = MessageRepository.statusLiveData
+
     fun getMessages(){
         viewModelScope.launch {
             MessageRepository.getMessages()

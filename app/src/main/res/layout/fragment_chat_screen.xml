@@ -4,9 +4,9 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="@color/white">
+    android:background="@color/white"
+    >
 
-    <!-- Heading for the user -->
     <TextView
         android:id="@+id/chatHeading"
         android:layout_width="match_parent"
@@ -40,7 +40,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingTop="8dp">
+        android:paddingTop="8dp"
+        android:fitsSystemWindows="true">
 
         <EditText
             android:id="@+id/messageEditText"
