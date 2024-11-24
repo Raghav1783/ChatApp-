@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.assignment.Adapter.ChatAdapter
 import com.example.assignment.R
 import com.example.assignment.ViewModels.MessageViewModel
+import com.example.assignment.network.data.MessageRequest
 import com.example.assignment.utils.NetworkResult
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -61,6 +62,14 @@ class ChatScreen : Fragment() {
 
                 }
             }
+        }
+
+        sendbtn.setOnClickListener{
+            if(messageET.text!=null)
+                MessageViewModel.createChat(MessageRequest(threadid.toString(),messageET.text.toString()))
+            messageET.text.clear()
+            MessageViewModel.getChats(threadid.toString())
+
         }
 
         MessageViewModel.getChats(threadid.toString())

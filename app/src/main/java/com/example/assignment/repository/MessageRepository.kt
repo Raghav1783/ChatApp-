@@ -3,6 +3,7 @@ package com.example.assignment.repository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.assignment.network.MessageApi
+import com.example.assignment.network.data.MessageRequest
 import com.example.assignment.network.data.MessageResponse
 import com.example.assignment.utils.NetworkResult
 import org.json.JSONObject
@@ -17,7 +18,14 @@ class MessageRepository @Inject constructor(private val messageApi: MessageApi) 
     val ChatsResponseLiveData: LiveData<NetworkResult<List<MessageResponse>>>
         get() = _ChatsResponseLiveData
 
+    private val _statusLiveData = MutableLiveData<NetworkResult<List<MessageResponse>>>()
+    val statusLiveData: LiveData<NetworkResult<List<MessageResponse>>>
+        get() = _statusLiveData
 
+    suspend fun createchats(messageRequest: MessageRequest){
+        _statusLiveData.postValue(NetworkResult.Loading())
+        messageApi.createMessage(messageRequest)
+    }
 
     suspend fun getMessages(){
         _allMessageResponseLiveData.postValue(NetworkResult.Loading())
