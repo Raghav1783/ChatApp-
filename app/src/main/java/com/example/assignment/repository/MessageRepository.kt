@@ -27,6 +27,11 @@ class MessageRepository @Inject constructor(private val messageApi: MessageApi) 
         messageApi.createMessage(messageRequest)
     }
 
+    suspend fun deleteChats(){
+        _statusLiveData.postValue(NetworkResult.Loading())
+        val response = messageApi.resetMessages()
+    }
+
     suspend fun getMessages(){
         _allMessageResponseLiveData.postValue(NetworkResult.Loading())
         try {

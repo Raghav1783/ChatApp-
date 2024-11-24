@@ -35,6 +35,18 @@ class AllMessage : Fragment() {
         val toolbar = view.findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
         toolbar.inflateMenu(R.menu.toolbar_menu)
 
+        toolbar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.action_delete -> {
+                    showDeleteConfirmationDialog()
+                    MessageViewModel.DeleteChat()
+                    MessageViewModel.getMessages()
+                    true
+                }
+                else -> false
+            }
+        }
+
         messageAdapter = MessageAdapter(::onThreadClicked)
         recyclerView.adapter = messageAdapter
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -63,7 +75,19 @@ class AllMessage : Fragment() {
     }
 
 
+    private fun showDeleteConfirmationDialog() {
+        val alertDialog = AlertDialog.Builder(requireContext())
+            .setTitle("Delete All Chats")
+            .setMessage("Are you sure you want to delete all chats?")
+            .setPositiveButton("Delete") { _, _ ->
+                MessageViewModel.DeleteChat()
+                MessageViewModel.getMessages()
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
 
+        alertDialog.show()
+    }
 
     private fun onThreadClicked(message:String){
         val bundle = Bundle()

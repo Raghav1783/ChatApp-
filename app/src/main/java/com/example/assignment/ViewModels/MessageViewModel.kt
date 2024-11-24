@@ -39,4 +39,11 @@ class MessageViewModel@Inject constructor(private val MessageRepository: Message
 
         }
     }
+
+    fun DeleteChat(){
+        viewModelScope.launch {
+            MessageRepository.deleteChats()
+
+        }
+    }
 }
