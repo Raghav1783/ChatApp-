@@ -1,11 +1,14 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id ("kotlin-kapt")
+    id ("androidx.navigation.safeargs")
+    id ("dagger.hilt.android.plugin")
 }
 
 android {
     namespace = "com.example.assignment"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.assignment"
@@ -45,4 +48,25 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    //navigation
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+    //coroutines
+    implementation(libs.kotlinx.coroutines.android)
+
+    //retrofit
+    implementation (libs.retrofit)
+    implementation (libs.converter.gson)
+    implementation (libs.logging.interceptor)
+
+    //dagger
+    implementation (libs.androidx.lifecycle.livedata.ktx)
+    kapt (libs.hilt.compiler)
+    implementation ("com.google.dagger:hilt-android:2.48")
+
+
+
+
+
+
 }
