@@ -2,6 +2,15 @@
 
 A simple messaging app for customer service agents to log in, view customer message threads, and respond.
 
+## Tech Stack
+
+- **Language**:  Kotlin
+- **UI**: XML
+- **Architecture**: MVVM (Model-View-ViewModel)
+- **Network**: Retrofit with Interceptor for Auth Token
+- **Dependency Injection**: Dagger
+- **Data Storage**: SharedPreferences (for saving auth token and user data)
+
 ## Features
 
 - **Login Screen**
